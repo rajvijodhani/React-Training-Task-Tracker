@@ -1,75 +1,72 @@
-import { Paper, Box, Typography, Button, Grid, Divider } from '@mui/material';
 import { useState } from 'react';
+import TaskForm from  './components/TaskForm';
+import TaskList from './components/TaskList';
+import { v4 as uuid } from 'uuid';
 
 /**
  * Simple task tracker app.
- * (For training purposes)
+ * (For training purposes) 
  */
 function App() {
+  // State to manage the list of tasks
   const [tasks, setTasks] = useState([
     { id: 1, text: 'Task 1', completed: false },
     { id: 2, text: 'Task 2', completed: true },
-    { id: 3, text: 'Task 3', completed: false }
+    { id: 3, text: 'Task 3', completed: false },
   ]);
 
+
   /**
-   * Handels the click on a task and toggles the complete property of the task object.
+   * Deletes a task with the specified id.
    *
-   * @param {number} taskId
+   * @param {number} id - The unique identifier of the task to be deleted.
    */
-  const handleTaskClick = (taskId) => {
-    // Iterate all tasks and find passed task by id
-    const updatedTasks = tasks.map(task => {
-      if (task.id === taskId) {
-        // Toggle completed property
-        return { ...task, completed: !task.completed };
-      }
-      return task;
-    });
-    setTasks(updatedTasks);
+  const deleteTask = (id) => {
+    // Filter out the task with the specified id and update the state
+    setTasks(tasks.filter(task => task.id !== id));
   };
 
   /**
-   * Handles the click on the delete button and removes it from the tasks list.
+   * Checks or unchecks a task based on the specified id.
    *
-   * @param {number} taskId
+   * @param {number} id - The unique identifier of the task to be checked or unchecked.
    */
-  const handleTaskDelete = (taskId) => {
-    // Filter all tasks excpet task with passed id
-    const updatedTasks = tasks.filter(task => task.id !== taskId);
-    setTasks(updatedTasks);
+  const checkTask = (id) => {
+    setTasks(
+      tasks.map((task) => {
+        if (task.id === id) {
+          // Toggle the completed property
+          task.completed = !task.completed;
+        }
+        return task;
+      })
+    );
   };
 
+  /**
+   * Adds a new task with the specified text to the list of tasks.
+   *
+   * @param {string} text - The text of the new task.
+   */
+  const addTask = (text) => {
+    const newTask = {
+      id: uuid(),
+      text: text,
+      completed: false
+    };
+    // Update the state with the new task added to the tasks array
+    setTasks([...tasks, newTask]);
+  };
+
+  // Render the components of the app
   return (
-    <Box mx={5} my={5}>
-      <Paper mx={5}>
-        <Box mx={5}>
-          <Box pt={3} pb={5}>
-            <Typography variant='h4'>Task Tracker</Typography>
-          </Box>
-          {tasks.map(task => (
-            <>
-              <Grid key={task.id} container justifyContent={"space-between"}>
-                <Grid item>
-                  <Typography
-                    style={{ textDecoration: task.completed ? 'line-through' : 'none' }}
-                    onClick={() => handleTaskClick(task.id)}
-                  >
-                    {task.text}
-                  </Typography>
-                </Grid>
-                <Grid item>
-                  <Button variant='contained' onClick={() => handleTaskDelete(task.id)}>Delete</Button>
-                </Grid>
-              </Grid>
-              <Box my={2}>
-                <Divider />
-              </Box>
-            </>
-          ))}
-        </Box>
-      </Paper>
-    </Box>
+    <div>
+      {/* TaskForm component for adding new tasks */}
+      <TaskForm addTask={addTask} />
+      
+      {/* TaskList component for displaying the list of tasks */}
+      <TaskList tasks={tasks} checkTask={checkTask} deleteTask={deleteTask} />
+    </div>
   );
 }
 
